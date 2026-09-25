@@ -11,6 +11,9 @@ tool does it for you:
 4. **Registers** you on Partiful, answering host questionnaires from your profile.
 5. **Checks** each result against your Partiful account and tracks approvals, so confirmed events can go to your calendar.
 
+![Review page: events per day, tiers, matched keywords, one-click dry run and registration](docs/screenshot.png)
+<sub>Demo data: public SF Tech Week events ranked for a fictional AI-infra founder profile.</sub>
+
 ---
 
 ## Quick start
