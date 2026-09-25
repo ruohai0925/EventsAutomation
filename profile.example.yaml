@@ -1,0 +1,66 @@
+# Copy to <your-workspace>/profile.yaml and fill it in. That file is git-ignored.
+# Everything personal and every ranking preference lives here; the code stays generic.
+
+me:
+  first_name: Ada
+  last_name: Lovelace
+  email: ada@example.com
+  phone: ""                      # only used if a form requires it (e.g. "phone for check-in")
+  twitter: ""                    # handle without "@" — Partiful's field already shows the @
+  company: Example Labs
+  job_title: Founder
+  linkedin: https://www.linkedin.com/in/example
+  github: https://github.com/example
+  website: https://example.com
+  country: United States
+  state: California
+  stage: Pre-seed
+  one_liner: "Founder of Example Labs, building X for Y."
+  base_location: "Your hotel, 123 Main St, San Francisco, CA"
+
+timezone: America/Los_Angeles    # time zone of the event city
+per_day: 4                       # how many events you can realistically attend per day
+
+# Answers to host questions, as an ORDERED list of [regex, answer]. The first rule whose regex
+# matches the question text wins, so put specific rules before general ones.
+# For multiple-choice questions the answer must match one of the options (whole-word match);
+# if it doesn't, the next matching rule is tried. {field} inserts a value from `me`.
+# Anything required that no rule answers is reported as "needs_input" — add a rule and rerun.
+answers:
+  - ["company name|name of your (company|startup)|organization name", "{company}"]
+  - ["role in the company|job title|your title|your role|position", "{job_title}"]
+  - ["startup'?s url|company (url|website)|website", "{website}"]
+  - ["linkedin", "{linkedin}"]
+  - ["github", "{github}"]
+  - ["twitter|\\bx handle", "{twitter}"]
+  - ["phone", "{phone}"]
+  - ["what country", "{country}"]
+  - ["your state|which state", "{state}"]
+  - ["stage", "{stage}"]
+  - ["best (describes?|identifies) you|which description|org(anization)? type", "Founder"]
+  - ["dietary|allerg|accessibility", "None"]
+  - ["referr?al code|who referred", "N/A"]
+  - ["sales outreach|sponsor|booth|pitch at the event", "No"]
+  - ["how did you hear", "SF Tech Week calendar"]
+  - ["how did you hear", "SF Tech Week"]           # fallback that matches a dropdown option
+  - ["why do you want|like to achieve|what brings you", "To meet people working on X and share what we've learned building Y."]
+  - ["what (are you|do you) (building|work on)|tell us about", "{one_liner}"]
+
+# Ranking: each interest adds `weight` if its regex matches the event title, host or description.
+# Tip: prefer specific terms; generic words ("simulation", "energy", "compute") create noise.
+interests:
+  core:     {weight: 8, pattern: "your core topic|another core term"}
+  adjacent: {weight: 3, pattern: "hardware|manufactur"}
+  founders: {weight: 2, pattern: "founders?\\b|fundrais|investors?\\b"}
+  # Conditional interest: only worth it when there's an angle for you ("bridge");
+  # adds bridge_weight if the bridge matches too, otherwise no_bridge_weight.
+  robotics: {weight: 0, pattern: "robot|embodied", bridge: "simulat|dataset|benchmark",
+             bridge_weight: 3, no_bridge_weight: -1}
+avoid: {weight: -3, pattern: "crypto|dating|fashion"}
+far:   {weight: -4, pattern: "palo alto|mountain view|oakland"}   # too far from base_location
+food:
+  bonus: 3
+  pattern: "dinner|lunch|breakfast|brunch|\\bfood\\b|bites|bbq|pizza|catered|happy hour|reception"
+prefer_neighborhoods: [SOMA, Downtown, FiDi]   # +1
+skip_neighborhoods: [Virtual]
+min_score: 5                                   # below this an event isn't shown at all

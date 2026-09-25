@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Picks</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e4e2dc;
+  --accent:#1f5eff; --accent-soft:#e8eeff; --a:#0f7b4a; --a-soft:#e3f4ec; --b:#9a6700; --b-soft:#fbf1dc;
+  --c:#77756f; --c-soft:#efeeea; --warn:#c2410c; --warn-soft:#fdebe1; --mine:#5b21b6; --mine-soft:#efe9fb;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#141413; --panel:#1c1c1a; --ink:#ecebe7; --muted:#a09e98; --line:#2e2d2a;
+    --accent:#7aa2ff; --accent-soft:#1d2744; --a:#4ad295; --a-soft:#15301f; --b:#f0b64a; --b-soft:#33280f;
+    --c:#a09e98; --c-soft:#262522; --warn:#fb8a55; --warn-soft:#3a2016; --mine:#b79bff; --mine-soft:#2a2140;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 20px 10px}
+h1{font-size:18px;margin:0 0 10px;font-weight:650;letter-spacing:-.01em}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.days{margin-bottom:8px}
+.day{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;cursor:pointer;min-width:92px;text-align:left;color:var(--ink)}
+.day b{display:block;font-size:13px}
+.day small{color:var(--muted);font-size:12px}
+.day.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.day.over small{color:var(--warn);font-weight:600}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:13px;color:var(--ink)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.spacer{flex:1}
+button.act{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:550}
+button.act.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.act:disabled{opacity:.5;cursor:default}
+main{padding:12px 20px 120px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{font-size:12px;color:var(--muted);font-weight:600;background:var(--panel);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+tr.dayhead td{background:var(--c-soft);font-weight:650;font-size:13px}
+tr.sel td{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))}
+tr.minerow td{background:color-mix(in srgb,var(--mine-soft) 55%,var(--panel))}
+td.chk{width:34px;text-align:center}
+input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--accent)}
+.time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+.name a{color:var(--ink);font-weight:560;text-decoration:none}
+.name a:hover{text-decoration:underline}
+.sub{color:var(--muted);font-size:12px;margin-top:2px}
+.terms{font-size:11.5px;margin-top:3px}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:5px;margin:2px 4px 0 0;background:var(--c-soft);color:var(--muted)}
+.tier{display:inline-block;min-width:22px;text-align:center;font-weight:700;font-size:12px;border-radius:6px;padding:2px 6px}
+.tier.A{background:var(--a-soft);color:var(--a)} .tier.B{background:var(--b-soft);color:var(--b)} .tier.C{background:var(--c-soft);color:var(--c)}
+.tier.M{background:var(--mine-soft);color:var(--mine)}
+.score{font-variant-numeric:tabular-nums;font-weight:600}
+.food{white-space:nowrap}
+.status{font-size:12px;white-space:nowrap}
+.st-ok{color:var(--a);font-weight:600} .st-pend{color:var(--b);font-weight:600} .st-bad{color:var(--warn);font-weight:600} .st-dry{color:var(--accent)}
+#log{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:#111;color:#d6d6d0;font:12px/1.5 ui-monospace,Consolas,monospace;padding:10px 20px;border-top:1px solid #333;display:none;white-space:pre-wrap}
+#log.show{display:block}
+#logx{position:sticky;top:0;float:right;background:#333;color:#eee;border:0;border-radius:6px;padding:2px 8px;cursor:pointer}
+.lang{min-width:44px}
+.legend{color:var(--muted);font-size:12px;margin-top:6px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+@media (max-width:760px){.hide-sm{display:none} header,main{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="row"><h1 data-t="title"></h1><span class="spacer"></span><button class="act lang" id="lang"></button></div>
+  <div class="row days" id="days"></div>
+  <div class="row">
+    <span class="chip on" data-f="A" data-t="fA"></span>
+    <span class="chip on" data-f="B" data-t="fB"></span>
+    <span class="chip on" data-f="C" data-t="fC"></span>
+    <span class="chip on" data-f="M" data-t="fM"></span>
+    <span class="chip" data-f="food" data-t="fFood"></span>
+    <span class="chip" data-f="sel" data-t="fSel"></span>
+    <label class="chip" style="cursor:default"><span data-t="minScore"></span> <input id="min" type="range" min="0" max="20" value="8" style="vertical-align:middle;width:110px"> <b id="minv">8</b></label>
+    <span class="spacer"></span>
+    <button class="act" data-run="sync" data-t="bSync"></button>
+    <button class="act" data-run="dry" data-t="bDry"></button>
+    <button class="act primary" data-run="real" data-t="bReal"></button>
+  </div>
+  <div class="legend" data-t="legend"></div>
+</header>
+<main><table><thead><tr>
+  <th></th><th data-t="hTime"></th><th data-t="hTier"></th><th class="hide-sm" data-t="hScore"></th><th data-t="hEvent"></th><th class="hide-sm" data-t="hWhere"></th><th data-t="hFood"></th><th data-t="hStatus"></th>
+</tr></thead><tbody id="rows"></tbody></table></main>
+<div id="log"><button id="logx">×</button><pre id="logtxt" style="margin:0;white-space:pre-wrap"></pre></div>
+<script>
+const I18N = {
+ en: {title:"Event picks", fA:"A · attend", fB:"B · backup", fC:"C · other", fM:"Registered", fFood:"Food only 🍽", fSel:"Selected only",
+  minScore:"Min score", bSync:"Sync Partiful status", bDry:"Dry run (don't submit)", bReal:"Register selected",
+  legend:"Ticking saves immediately. Aim for ≤ {per} tier-A events a day — your existing registrations are scored too: “Reg·A” made the cut, “Reg·B” overlaps something better (drop it once approvals are in). B = backups against rejections, not counted toward the daily budget. C = other matches; the slider controls how many show (ticked ones always show). Purple rows = already registered on Partiful.",
+  hTime:"Time", hTier:"Tier", hScore:"Score", hEvent:"Event", hWhere:"Where", hFood:"Food", hStatus:"Status",
+  all:"All", events:"events", dayCard:"A {n}/{per} · reg {m}", backups:" · backup {b}",
+  dayHead:"{day} · tier A {n}/{per} (registered {ma} + new {s}) · registered total {m} · new backups {b}", over:" · over {per}/day",
+  regA:"Reg·A", regB:"Reg·B", regAtip:"Registered, and in your tier A", regBtip:"Registered, but something better-scored overlaps; consider dropping once approved",
+  needsApproval:"approval", apply:"Needs approval", rsvp:"Instant RSVP", submitted:"Submitted", needsInput:"Needs info",
+  hits:"Matched: ", empty:"No events match the filters", confirm:"Register {n} selected events on Partiful (already-registered ones are skipped)?", busy:"A job is already running",
+  st:{PENDING_APPROVAL:"Pending", APPROVED:"Approved", GOING:"Going", WAITLIST:"Waitlist", WAITLISTED_FOR_APPROVAL:"Waitlist", MAYBE:"Maybe", DECLINED:"Declined", REJECTED:"Rejected", WITHDRAWN:"Withdrawn"},
+  tags:{"robotics+bridge":"robotics · has an angle", "robotics-no_bridge":"robotics · no angle", far:"far away"}},
+ zh: {title:"活动报名挑选", fA:"A 主选", fB:"B 候补", fC:"C 其他", fM:"已报名", fFood:"只看管饭 🍽", fSel:"只看已勾选",
+  minScore:"最低分", bSync:"同步 Partiful 状态", bDry:"试填（不提交）", bReal:"正式报名已勾选",
+  legend:"勾选即保存。每天主选 ≤ {per} 场（已报的活动也参与打分：「已报·主」在主选里，「已报·候」是同时段有更高分的，审批通过后可放弃）。B 候补用来对冲被拒，不计入主选。C 为其余匹配活动，用「最低分」滑块控制显示多少（已勾选的始终显示）。紫色行 = 已在 Partiful 上报名。",
+  hTime:"时间", hTier:"档", hScore:"分", hEvent:"活动", hWhere:"地点", hFood:"饭", hStatus:"状态",
+  all:"全部", events:"场", dayCard:"主选 {n}/{per} · 已报 {m}", backups:" · 候补 {b}",
+  dayHead:"{day} · 主选 {n}/{per}（已报 {ma} + 新勾选 {s}）· 已报总数 {m} · 新候补 {b}", over:" · 主选超出每天 {per} 场",
+  regA:"已报·主", regB:"已报·候", regAtip:"已报名，在主选里", regBtip:"已报名，但同时段有更高分的活动；审批通过后可考虑放弃",
+  needsApproval:"需审批", apply:"需审批", rsvp:"直接报名", submitted:"已提交", needsInput:"需补充信息",
+  hits:"命中：", empty:"没有符合筛选的活动", confirm:"将在 Partiful 上正式报名 {n} 场已勾选的活动（已报名的会自动跳过）。确定？", busy:"已有任务在运行",
+  st:{PENDING_APPROVAL:"待审批", APPROVED:"已通过", GOING:"已确认", WAITLIST:"候补名单", WAITLISTED_FOR_APPROVAL:"候补名单", MAYBE:"Maybe", DECLINED:"已拒绝", REJECTED:"被拒", WITHDRAWN:"已撤回"},
+  tags:{"robotics+bridge":"机器人·有切入点", "robotics-no_bridge":"机器人·无切入点", robotics:"机器人", sim_cae:"仿真/CAE/科学计算", engineering:"工程/工业",
+   simulation:"simulation(泛)", sim_companies:"仿真公司", harness_evals:"Harness/评测/数据", data_models:"RL/世界模型", compute_infra:"算力/芯片",
+   founders:"创始人/融资", ai_builders:"AI 开发者", far:"距离远"}}
+};
+const stored = (() => { try { return localStorage.getItem("lang"); } catch { return null; } })();
+let LANG = stored || ((navigator.language||"").toLowerCase().startsWith("zh") ? "zh" : "en");
+const T = (k, v={}) => String(I18N[LANG][k] ?? I18N.en[k] ?? k).replace(/\{(\w+)\}/g, (_,x) => v[x] ?? "");
+const tagLabel = t => (I18N[LANG].tags||{})[t] || I18N.en.tags[t] || t.replace(/_/g," ");
+const ST_CLS = {PENDING_APPROVAL:"st-pend", APPROVED:"st-ok", GOING:"st-ok", WAITLIST:"st-pend", WAITLISTED_FOR_APPROVAL:"st-pend", MAYBE:"st-pend", DECLINED:"st-bad", REJECTED:"st-bad", WITHDRAWN:"st-bad"};
+
+const S = {data:null, day:"all", f:new Set(["A","B","C","M"]), min:8};
+const pid = u => u.replace(/\/$/,"").split("/").pop();
+const dkey = iso => iso.slice(0,10);
+const fmtDay = k => k.startsWith("9999") ? "TBD" : new Date(k+"T12:00").toLocaleDateString(LANG==="zh"?"zh-CN":"en-US",{month:"numeric",day:"numeric",weekday:"short"});
+const hm = iso => iso.slice(11,16);
+const esc = s => String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function localFromUTC(z){ // Partiful account data is UTC; show it in the event city's time zone
+  if (isNaN(new Date(z))) return null; // "TBD"
+  const p = new Intl.DateTimeFormat("sv-SE",{timeZone:S.data.timezone||"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(z));
+  return p.replace(" ","T");
+}
+
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = T(el.dataset.t, {per:S.data?.per_day ?? 4}));
+  document.getElementById("lang").textContent = LANG==="zh" ? "EN" : "中文";
+  document.title = T("title");
+}
+
+function rows(){
+  const d = S.data; const mine = d.mine || {}; const regs = d.registrations || {}; const mt = d.mine_tiers || {};
+  const minePids = new Set(Object.keys(mine)); const out = [];
+  for (const [k,m] of Object.entries(mine)) {
+    const t = mt[k] || {};
+    const start = localFromUTC(m.start) || (d.picks.find(p => pid(p.url)===k)||{}).start || "9999-12-31T00:00";
+    out.push({mine:true, id:"m_"+k, tier:"M", mtier:t.tier||"B", start, end:null, name:m.title, url:m.url,
+              status:m.status, score:t.score??"", food:t.food||[], why:t.why||[], host:"", hood:""});
+  }
+  for (const p of d.picks) if (!minePids.has(pid(p.url))) out.push({...p, reg: regs[p.id]});
+  return out.sort((a,b)=> a.start.localeCompare(b.start));
+}
+
+function dayCounts(all){
+  const c = {};
+  for (const r of all){
+    const k = dkey(r.start); c[k] ??= {mine:0, mineA:0, sel:0, bak:0};
+    if (r.mine && !["DECLINED","REJECTED","WITHDRAWN"].includes(r.status)) { c[k].mine++; if (r.mtier==="A") c[k].mineA++; }
+    if (!r.mine && r.register) (r.tier==="B" ? c[k].bak++ : c[k].sel++);
+  }
+  return c;
+}
+
+function statusCell(r){
+  if (r.mine) return `<span class="status ${ST_CLS[r.status]||""}">${esc(I18N[LANG].st[r.status]||r.status)}</span>`;
+  if (!r.reg) return `<span class="status sub">${T(r.action==="APPLY"?"apply":"rsvp")}</span>`;
+  const s = r.reg.status || "";
+  if (s.startsWith("submitted") || s==="already") return `<span class="status st-pend">${T("submitted")}</span>`;
+  if (s==="needs_input") return `<span class="status st-bad" title="${esc((r.reg.extra||[]).join("\n"))}">${T("needsInput")}</span>`;
+  return `<span class="status st-bad">${esc(s)}</span>`;
+}
+
+function render(){
+  applyStatic();
+  const all = rows(); const counts = dayCounts(all); const per = S.data.per_day;
+  document.getElementById("days").innerHTML =
+    `<button class="day ${S.day==="all"?"on":""}" data-day="all"><b>${T("all")}</b><small>${all.filter(r=>r.mine||r.register).length} ${T("events")}</small></button>` +
+    Object.keys(counts).sort().map(k => { const c = counts[k], n = c.mineA + c.sel;
+      return `<button class="day ${S.day===k?"on":""} ${n>per?"over":""}" data-day="${k}"><b>${fmtDay(k)}</b><small>${T("dayCard",{n,per,m:c.mine})}${c.bak?T("backups",{b:c.bak}):""}</small></button>`; }).join("");
+  const f = S.f; let last = null; const html = [];
+  for (const r of all){
+    const k = dkey(r.start);
+    if (S.day!=="all" && k!==S.day) continue;
+    if (!f.has(r.tier)) continue;
+    if (f.has("food") && !(r.food||[]).length) continue;
+    if (!r.mine && !r.register && r.score < S.min) continue;
+    if (f.has("sel") && !(r.mine || r.register)) continue;
+    if (k!==last){ last=k; const c = counts[k], n = c.mineA + c.sel;
+      html.push(`<tr class="dayhead"><td colspan="8">${T("dayHead",{day:fmtDay(k),n,per,ma:c.mineA,s:c.sel,m:c.mine,b:c.bak})}${n>per?`<span class="st-bad">${T("over",{per})}</span>`:""}</td></tr>`); }
+    const why = r.why||[];
+    const tags = why.filter(t=>!(t==="robotics" && why.some(w=>w.startsWith("robotics")&&w!=="robotics"))).map(t=>`<span class="tag">${esc(tagLabel(t))}</span>`).join("");
+    const tierCls = r.tier==="M" ? (r.mtier==="A"?"A":"M") : r.tier;
+    const tierTxt = r.tier==="M" ? T(r.mtier==="A"?"regA":"regB") : r.tier;
+    html.push(`<tr class="${r.mine?"minerow":""} ${r.register&&!r.mine?"sel":""}">
+      <td class="chk">${r.mine?"✓":`<input type="checkbox" data-id="${r.id}" ${r.register?"checked":""}>`}</td>
+      <td class="time">${hm(r.start)}${r.end?"–"+hm(r.end):""}</td>
+      <td><span class="tier ${tierCls}" title="${r.mine?T(r.mtier==="A"?"regAtip":"regBtip"):""}">${tierTxt}</span></td>
+      <td class="score hide-sm">${r.score}</td>
+      <td class="name"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a>
+        <div class="sub">${esc(r.host||"")}${r.action==="APPLY"?" · "+T("needsApproval"):""}</div><div>${tags}</div>
+        ${(r.terms||[]).length?`<div class="sub terms">${T("hits")}${(r.terms||[]).map(esc).join(" · ")}</div>`:""}</td>
+      <td class="hide-sm sub">${esc(r.hood||"")}</td>
+      <td class="food" title="${esc((r.food||[]).join(", "))}">${(r.food||[]).length?"🍽":""}</td>
+      <td>${statusCell(r)}</td></tr>`);
+  }
+  document.getElementById("rows").innerHTML = html.join("") || `<tr><td colspan="8" class="empty">${T("empty")}</td></tr>`;
+  const run = S.data.run; const log = document.getElementById("log");
+  document.querySelectorAll("[data-run]").forEach(b=> b.disabled = run.running);
+  const sig = run.log.length + ":" + (run.log[0]||"") + (run.log.at(-1)||"");
+  if (run.log.length && sig !== S.logHidden){ log.classList.add("show"); document.getElementById("logtxt").textContent = run.log.join("\n"); log.scrollTop = log.scrollHeight; }
+  else log.classList.remove("show");
+  S.logSig = sig;
+}
+
+async function load(){ S.data = await (await fetch("/api/state")).json(); render(); }
+async function post(u, b){ return fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)}); }
+
+document.addEventListener("click", async e => {
+  if (e.target.closest("#logx")){ S.logHidden = S.logSig; render(); return; }
+  if (e.target.closest("#lang")){ LANG = LANG==="zh"?"en":"zh"; try { localStorage.setItem("lang", LANG); } catch {} render(); return; }
+  const day = e.target.closest("[data-day]"); if (day){ S.day = day.dataset.day; render(); return; }
+  const chip = e.target.closest(".chip[data-f]"); if (chip){ const k = chip.dataset.f; S.f.has(k)?S.f.delete(k):S.f.add(k); chip.classList.toggle("on"); render(); return; }
+  const run = e.target.closest("[data-run]");
+  if (run){
+    const mode = run.dataset.run;
+    if (mode==="real"){ const n = S.data.picks.filter(p=>p.register && !(S.data.registrations[p.id]||{}).status?.startsWith("submitted")).length;
+      if (!confirm(T("confirm",{n}))) return; }
+    const r = await post("/api/run",{mode}); if (r.status===409) alert(T("busy"));
+    load(); return;
+  }
+});
+document.addEventListener("change", async e => {
+  const cb = e.target.closest("input[data-id]"); if (!cb) return;
+  const p = S.data.picks.find(p=>p.id===cb.dataset.id); p.register = cb.checked; render();
+  await post("/api/pick",{ids:[cb.dataset.id], register:cb.checked});
+});
+document.getElementById("min").addEventListener("input", e => { S.min = +e.target.value; document.getElementById("minv").textContent = S.min; render(); });
+load(); setInterval(()=>{ if (S.data?.run.running || S.data?.run.log.length) load(); }, 2000);
+</script>
+</body>
+</html>

@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- EventsAutomation: personal data, never commit ----
+# Personal data — never commit. Each workspace (e.g. SF_tech/) holds only private files.
+**/personal_info.txt
+**/profile.yaml
+**/picks.yaml
+**/shortlist.md
+**/data/
+**/.browser-profile/
+**/secrets/
+*.ics
+nohup.out
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
